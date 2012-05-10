@@ -111,4 +111,18 @@ class MyRoadmapsController < ApplicationController
     end
     @query.filters={ 'project_id' => {:operator => "*", :values => [""]} } if @query.filters.length==0
   end
+
+  # backported from redmine 1.3 queries_helper.rb
+  def build_query_from_params
+    if params[:fields] || params[:f]
+      @query.filters = {}
+      @query.add_filters(params[:fields] || params[:f], params[:operators] || params[:op], params[:values] || params[:v])
+    else
+      @query.available_filters.keys.each do |field|
+        @query.add_short_filter(field, params[field]) if params[field]
+      end
+    end
+    @query.group_by = params[:group_by] || (params[:query] && params[:query][:group_by])
+    @query.column_names = params[:c] || (params[:query] && params[:query][:column_names])
+  end
 end
